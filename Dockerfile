@@ -1,5 +1,5 @@
 # Stage 1: Build the Meteor application
-FROM geoffreybooth/meteor-node:2.12.0
+FROM geoffreybooth/meteor-node:latest
 
 # Copy everything into the container
 COPY . /source

@@ -24,7 +24,14 @@ RUN npm install --production
 ENV PATH=$PATH:/home/mt/.meteor
 RUN meteor build --directory ~/dc/ --architecture os.linux.x86_64
 WORKDIR /home/mt/dc/bundle/programs/server
-RUN npm install
+
+# Switch to root to fix file permissions, then assign them to the 'mt' user
+USER root
+RUN chown -R mt:mt /home/mt/dc/bundle
+
+# Switch back to the standard user to run npm install safely
+USER mt
+RUN npm install --unsafe-perm
 WORKDIR /home/mt/dc/bundle
 RUN rm -r /home/mt/dicecloud
 

@@ -1,27 +1,24 @@
-FROM ubuntu:jammy
+# Stage 1: Build the Meteor application
+FROM geoffreybooth/meteor-node:2.12.0
 
-USER root
-RUN adduser --system mt
+# Copy everything into the container
+COPY . /source
+WORKDIR /source/app
 
-RUN apt-get update
-RUN apt-get install --quiet --yes curl
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get update
-RUN apt-get install --quiet --yes nodejs git
+# Install production dependencies and build the bundle
+RUN meteor npm install --production
+RUN meteor build --directory /bundle
 
-USER mt
+# Stage 2: Create the slim production image
+FROM node:14-alpine
+RUN apk add --no-cache bash
 
-RUN curl https://install.meteor.com/ | sh
+COPY --from=0 /bundle/bundle /app
+WORKDIR /app/programs/server
 
-WORKDIR /home/mt
-RUN git clone https://github.com/ThaumRystra/DiceCloud dicecloud
-WORKDIR /home/mt/dicecloud/app
-RUN npm install --production
-ENV PATH=$PATH:/home/mt/.meteor
-RUN meteor build --directory ~/dc/ --architecture os.linux.x86_64
-WORKDIR /home/mt/dc/bundle/programs/server
 RUN npm install
-WORKDIR /home/mt/dc/bundle
-RUN rm -r /home/mt/dicecloud
 
-ENTRYPOINT node main.js
+ENV PORT=3000
+EXPOSE 3000
+
+CMD ["node", "/app/main.js"]

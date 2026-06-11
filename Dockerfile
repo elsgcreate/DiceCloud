@@ -1,6 +1,6 @@
-# Use an official Node 14 base image built on Debian (Buster)
-# This guarantees Node 14 is perfectly installed alongside standard build tools
-FROM node:14-buster
+# Use an official Node 14 base image built on Debian Bullseye
+# This fixes the broken apt-get repository issues found in Buster
+FROM node:14-bullseye
 
 USER root
 RUN adduser --system --group mt

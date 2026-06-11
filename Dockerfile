@@ -29,9 +29,11 @@ RUN meteor build --directory /home/mt/dc/ --architecture os.linux.x86_64
 # Move to the production bundle server folder
 WORKDIR /home/mt/dc/bundle/programs/server
 
-# Temporarily switch to root to adjust ALL home folder file permissions comprehensively
+# Temporarily switch to root to grant total ownership AND read/write access
 USER root
-RUN chown -R mt:nogroup /home/mt
+RUN chown -R mt:nogroup /home/mt && \
+    find /home/mt -type d -exec chmod 755 {} + && \
+    find /home/mt -type f -exec chmod 644 {} +
 
 # Switch back to 'mt' to safely install server production dependencies
 USER mt

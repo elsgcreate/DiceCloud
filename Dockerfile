@@ -1,16 +1,12 @@
-FROM ubuntu:jammy
+# Use an official Node 14 base image built on Debian (Buster)
+# This guarantees Node 14 is perfectly installed alongside standard build tools
+FROM node:14-buster
 
 USER root
-RUN adduser --system mt
+RUN adduser --system --group mt
 
-# Install system dependencies & Node.js 18
-RUN apt-get update && apt-get install -y ca-certificates curl gnupg
-RUN mkdir -p /etc/apt/keyrings
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-
-ARG NODE_MAJOR=18
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
-RUN apt-get update && apt-get install -y nodejs git build-essential
+# Install Meteor's required system dependencies (git, curl, etc.)
+RUN apt-get update && apt-get install -y ca-certificates curl git build-essential
 
 # Switch to the 'mt' user to install Meteor and clone the app safely
 USER mt
@@ -31,7 +27,7 @@ WORKDIR /home/mt/dc/bundle/programs/server
 
 # Temporarily switch to root to grant total ownership AND read/write access
 USER root
-RUN chown -R mt:nogroup /home/mt && \
+RUN chown -R mt:mt /home/mt && \
     find /home/mt -type d -exec chmod 755 {} + && \
     find /home/mt -type f -exec chmod 644 {} +
 
